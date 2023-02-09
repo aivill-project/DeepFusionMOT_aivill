@@ -139,7 +139,22 @@ if __name__ == '__main__':
     image_path_0 = os.path.join(save_root, 'image'); mkdir_if_inexistence(image_path_0)
     # Open file to save in list.
     # det_id2str = {1: 'Pedestrian', 2: 'Car', 3: 'Cyclist'}
-    det_id2str = {1: 'Car', 2: 'Two_Wheeler', 3: 'Adult', 4: 'Kid', 5: 'SUV', 6: 'Van'}
+    # det_id2str = {1: 'Car', 2: 'Two_Wheeler', 3: 'Adult', 4: 'Kid', 5: 'SUV', 6: 'Van'}
+    det_id2str = {1: 'Small_Car',
+                    2: 'Light_Car',
+                    3: 'Car',
+                    4: 'Van',
+                    5: 'SUV',
+                    6: 'Small_Truck',
+                    7: 'Medium_Truck',
+                    8: 'Large_Truck',
+                    9: 'Mini_Bus',
+                    10: 'Bus',
+                    11: 'Special_Vehicle',
+                    12: 'Two_Wheeler',
+                    13: 'Kickboard',
+                    14: 'Adult',
+                    15: 'Kid'}
     calib_files = os.listdir(calib_root)
     detections_files_3D = sorted(os.listdir(detections_root_3D))
     detections_files_2D = sorted(os.listdir(detections_root_2D))
