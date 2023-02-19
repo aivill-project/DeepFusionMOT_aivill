@@ -17,10 +17,6 @@ def datafusion2Dand3D(detections_3D_camera, detection_2D, detection_3Dto2D, addi
         detection_3D_only: Objects detected by LiDAR only.
     '''
     iou_threshold = 0.3
-    
-    detection_2D_class = detection_2D[:, 0] # 2D detection class
-    detection_2D = detection_2D[:, 1:5] # 2D detection bbox
-    
     iou_matrix = np.zeros((len(detection_2D), len(detection_3Dto2D)), dtype=np.float32)
     for d1, det_2D in enumerate(detection_2D):
         for d2, det_3Dto2D in enumerate(additional_info):
@@ -62,7 +58,6 @@ def datafusion2Dand3D(detections_3D_camera, detection_2D, detection_3Dto2D, addi
 
     for detection_2D_idx, detection_3Dto2D_idx in matched:
         detection_2D_fusion.append(detection_2D[detection_2D_idx].tolist())
-        additional_info[detection_3Dto2D_idx][1] = detection_2D_class[detection_2D_idx] # additional_info change 3D class to 2D class
         detection_3D_fusion_info.append(additional_info[detection_3Dto2D_idx])
         detection_3Dto2D_fusion.append(detection_3Dto2D[detection_3Dto2D_idx].tolist())
         detection_3D_fusion.append(detections_3D_camera[detection_3Dto2D_idx].tolist())
@@ -75,14 +70,8 @@ def datafusion2Dand3D(detections_3D_camera, detection_2D, detection_3Dto2D, addi
         detection_3D_only.append(detections_3D_camera[unmatched_detections_2Dto3D_idx].tolist())
         detection_3D_only_info.append(additional_info[unmatched_detections_2Dto3D_idx])
 
-    # detection_3D_fusion = {'dets_3d_fusion': detection_3D_fusion, 'dets_3d_fusion_info': detection_3D_fusion_info}
-    # detection_3D_only = {'dets_3d_only': detection_3D_only, 'dets_3d_only_info': detection_3D_only_info}
-    
     detection_3D_fusion = {'dets_3d_fusion': detection_3D_fusion, 'dets_3d_fusion_info': detection_3D_fusion_info}
-    detection_3D_only = {'dets_3d_only': [], 'dets_3d_only_info': []}
-    
-    new_additional_info = additional_info[matched[:, 1]]
-    
+    detection_3D_only = {'dets_3d_only': detection_3D_only, 'dets_3d_only_info': detection_3D_only_info}
+
     return np.array(detection_2D_fusion), np.array(detection_3Dto2D_fusion), detection_3D_fusion, \
-               np.array(detection_2D_only), np.array(detection_2Dto3D_only), detection_3D_only, \
-                   new_additional_info
+               np.array(detection_2D_only), np.array(detection_2Dto3D_only), detection_3D_only
