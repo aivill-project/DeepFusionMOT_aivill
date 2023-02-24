@@ -181,8 +181,8 @@ if __name__ == '__main__':
         calib_file_seq = os.path.join(calib_root, ''.join(calib_file))
         image_dir = os.path.join(dataset_dir, image_filename)
         image_filenames = sorted([join(image_dir, x) for x in listdir(image_dir) if is_image_file(x)])
-        seq_dets_3D = np.loadtxt(seq_file_3D, delimiter=',')  # load 3D detections, N x 15
-        seq_dets_2D = np.loadtxt(seq_file_2D, delimiter=',')  # load 2D detections, N x 6
+        seq_dets_3D = np.loadtxt(seq_file_3D, delimiter=',').reshape(-1, 15)  # load 3D detections, N x 15
+        seq_dets_2D = np.loadtxt(seq_file_2D, delimiter=',').reshape(-1, 7)  # load 2D detections, N x 6
 
         # min_frame, max_frame = int(seq_dets_3D[:, 0].min()), len(image_filenames)
         select_frames = list(set(seq_dets_3D[:, 0].astype(int).flatten().tolist()))
