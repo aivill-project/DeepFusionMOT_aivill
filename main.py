@@ -21,7 +21,7 @@ parser.add_argument('--save-path', type=str, default='results/train', help='resu
 parser.add_argument('--save-img', action='store_true', help='save image')
 parser.add_argument('--eval', action='store_true', help='start evaluation')
 parser.add_argument('--gt-data', type=str, default=None, help='gt data dataframe path')
-parser.add_argument('--eval-output', type=str, default=None, help='eval result save path')
+# parser.add_argument('--eval-output', type=str, default=None, help='eval result save path')
 args = parser.parse_args()
 
 # data_root = 'datasets/kitti/train'
@@ -272,7 +272,7 @@ if __name__ == '__main__':
         import panadas as pd
 
         src = args.save_path
-        dst = args.save_path
+        dst = args.save_path + '/trackeval'
 
         os.makedirs(f'{dst}/gt/label_02', exist_ok=True)
         os.makedirs(f'{dst}/trackers/label_02', exist_ok=True)
@@ -312,7 +312,7 @@ if __name__ == '__main__':
         os.chdir('./TrackEval_aivill')
         GT_FOLDER = dst + '/gt'
         TRACKERS_FOLDER = dst + '/trackers'
-        OUTPUT_FOLDER = args.eval_output
+        OUTPUT_FOLDER = dst
         run_trackeval = f'python scripts/run_kitti.py --GT_FOLDER {GT_FOLDER} --TRACKERS_FOLDER {TRACKERS_FOLDER} --OUTPUT_FOLDER {OUTPUT_FOLDER}'
 
         subprocess.call(run_trackeval, shell=True)
