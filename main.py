@@ -123,7 +123,7 @@ if __name__ == '__main__':
     # data_root = 'datasets/kitti/train'
     # detections_name_3D = '3D_pointrcnn_Car_val'
     # detections_name_2D = '2D_rrc_Car_val'
-    data_root = args.data_root
+    data_root = args.data_path
     detections_name_3D = args.detections3D
     detections_name_2D = args.detections2D
 
@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     # Define the file path of results.
     # save_root = 'results/train'   # The root directory where the result is saved
-    save_root = args.save_root
+    save_root = args.save_path
     txt_path_0 = os.path.join(save_root, 'data'); mkdir_if_inexistence(txt_path_0)
     image_path_0 = os.path.join(save_root, 'image'); mkdir_if_inexistence(image_path_0)
     # Open file to save in list.
@@ -271,16 +271,17 @@ if __name__ == '__main__':
         import subprocess
         import panadas as pd
 
-        src = args.save_root
-        dst = args.save_root
+        src = args.save_path
+        dst = args.save_path
 
         os.makedirs(f'{dst}/gt/label_02', exist_ok=True)
         os.makedirs(f'{dst}/trackers/label_02', exist_ok=True)
 
-        scenes = sorted(os.listdir(f'{src}/image'))
+        scenes = sorted(os.listdir(f'{src}/data'))
         dp = pd.read_csv(args.gt_data, index_col=0, dtype={'frame':object})
 
         for scene in tqdm(scenes):
+            scene = scene.replace('.txt', '')
 
             # make gt, evaluate_tracking.seqmap.training
             seqmap = [f'{scene} empty 0000 0010' for scene in scenes]
