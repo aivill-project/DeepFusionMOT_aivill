@@ -14,11 +14,14 @@ os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('--data-root', type=str, default='datasets/kitti/train', help='dataset path')
+parser.add_argument('--data-path', type=str, default='datasets/kitti/train', help='dataset path')
 parser.add_argument('--detections3D', type=str, default='3D_pointrcnn_Car_val', help='detections 3D foldername')
 parser.add_argument('--detections2D', type=str, default='2D_rrc_Car_val', help='detections 2D foldername')
-parser.add_argument('--save-root', type=str, default='results/train', help='result save path')
+parser.add_argument('--save-path', type=str, default='results/train', help='result save path')
 parser.add_argument('--save-img', action='store_true', help='save image')
+parser.add_argument('--eval', action='store_true', help='start evaluation')
+parser.add_argument('--gt-data', type=str, default=None, help='gt data dataframe path')
+parser.add_argument('--eval-output', type=str, default=None, help='eval result save path')
 args = parser.parse_args()
 
 # data_root = 'datasets/kitti/train'
@@ -262,3 +265,56 @@ if __name__ == '__main__':
         i += 1
         print('--------------The time it takes to process all datasets are {}s --------------'.format(total_time))
     print('--------------FPS = {} --------------'.format(total_frames/total_time))
+
+    # for evaluation
+    if args.eval:
+        import subprocess
+        import panadas as pd
+
+        src = args.save_root
+        dst = args.save_root
+
+        os.makedirs(f'{dst}/gt/label_02', exist_ok=True)
+        os.makedirs(f'{dst}/trackers/label_02', exist_ok=True)
+
+        scenes = sorted(os.listdir(f'{src}/image'))
+        dp = pd.read_csv(args.gt_data, index_col=0, dtype={'frame':object})
+
+        for scene in tqdm(scenes):
+
+            # make gt, evaluate_tracking.seqmap.training
+            seqmap = [f'{scene} empty 0000 0010' for scene in scenes]
+            seqmap[0] = re.sub('0000', '0001', seqmap[0])
+            with open(f'{dst}/gt/evaluate_tracking.seqmap.training', 'w') as f:
+                f.write('\n'.join(seqmap))
+
+            
+            # make gt, label_02
+            scene_df = dp.loc[dp['scene']==scene].copy()
+            scene_df[['truncated', 'occluded', 'alpha']]= 0
+            scene_df['frame'] = scene_df['frame'].astype(int)
+            scene_df[['frame']]
+            scene_df = scene_df[['frame', 'id', 'class', 'truncated', 'occluded', 'alpha', 'min_x', 'min_y', 'max_x', 'max_y', 'h', 'w', 'l', 'point_x', 'point_y', 'point_z', 'rot_y']]
+            dropped_duple_idx = scene_df[['frame', 'id']].drop_duplicates().index
+            scene_df = scene_df.loc[dropped_duple_idx].copy()
+            scene_df.to_csv(f'{dst}/gt/label_02/{scene}.txt', index=None, header=None, sep=' ')
+
+
+            # make trakers, label_02
+            if os.path.isfile(f'{src}/data/{scene}.txt')==False:
+                null_data = '0 0 None 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0'
+                with open(f'{dst}/trackers/label_02/{scene}.txt', 'w') as f:
+                    f.write(null_data)
+            else:
+                shutil.copy(f'{src}/data/{scene}.txt', f'{dst}/trackers/label_02/{scene}.txt')
+
+        os.chdir('./TrackEval_aivill')
+        GT_FOLDER = dst + '/gt'
+        TRACKERS_FOLDER = dst + '/trackers'
+        OUTPUT_FOLDER = args.eval_output
+        run_trackeval = f'python scripts/run_kitti.py --GT_FOLDER {GT_FOLDER} --TRACKERS_FOLDER {TRACKERS_FOLDER} --OUTPUT_FOLDER {OUTPUT_FOLDER}'
+
+        subprocess.call(run_trackeval, shell=True)
+
+
+
