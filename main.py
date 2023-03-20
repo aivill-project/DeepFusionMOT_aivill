@@ -160,10 +160,10 @@ if __name__ == '__main__':
     #                 14: 'Adult',
     #                 15: 'Kid'}
 
-    calib_files = sorted(os.listdir(calib_root))[609:614]
-    detections_files_3D = sorted(os.listdir(detections_root_3D))[609:614]
-    detections_files_2D = sorted(os.listdir(detections_root_2D))[610:615]
-    image_files = sorted(os.listdir(dataset_dir))[610:615]
+    calib_files = sorted(os.listdir(calib_root))
+    detections_files_3D = sorted(os.listdir(detections_root_3D))
+    detections_files_2D = sorted(os.listdir(detections_root_2D))
+    image_files = sorted(os.listdir(dataset_dir))
     detection_file_list_3D, num_seq_3D = load_list_from_folder(detections_files_3D, detections_root_3D)
     # print(detection_file_list_3D)
     detection_file_list_2D, num_seq_2D = load_list_from_folder(detections_files_2D, detections_root_2D)
