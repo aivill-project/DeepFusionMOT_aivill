@@ -75,11 +75,11 @@ def datafusion2Dand3D(detections_3D_camera, detection_2D, detection_3Dto2D, addi
         detection_3D_only.append(detections_3D_camera[unmatched_detections_2Dto3D_idx].tolist())
         detection_3D_only_info.append(additional_info[unmatched_detections_2Dto3D_idx])
 
-    # detection_3D_fusion = {'dets_3d_fusion': detection_3D_fusion, 'dets_3d_fusion_info': detection_3D_fusion_info}
-    # detection_3D_only = {'dets_3d_only': detection_3D_only, 'dets_3d_only_info': detection_3D_only_info}
-    
     detection_3D_fusion = {'dets_3d_fusion': detection_3D_fusion, 'dets_3d_fusion_info': detection_3D_fusion_info}
-    detection_3D_only = {'dets_3d_only': [], 'dets_3d_only_info': []}
+    detection_3D_only = {'dets_3d_only': detection_3D_only, 'dets_3d_only_info': detection_3D_only_info}
+    
+    # detection_3D_fusion = {'dets_3d_fusion': detection_3D_fusion, 'dets_3d_fusion_info': detection_3D_fusion_info}
+    # detection_3D_only = {'dets_3d_only': [], 'dets_3d_only_info': []}
     
     new_additional_info = additional_info[matched[:, 1]]
     

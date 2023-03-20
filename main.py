@@ -159,10 +159,11 @@ if __name__ == '__main__':
     #                 13: 'Kickboard',
     #                 14: 'Adult',
     #                 15: 'Kid'}
-    calib_files = os.listdir(calib_root)
-    detections_files_3D = sorted(os.listdir(detections_root_3D))
-    detections_files_2D = sorted(os.listdir(detections_root_2D))
-    image_files = sorted(os.listdir(dataset_dir))
+
+    calib_files = sorted(os.listdir(calib_root))[609:614]
+    detections_files_3D = sorted(os.listdir(detections_root_3D))[609:614]
+    detections_files_2D = sorted(os.listdir(detections_root_2D))[610:615]
+    image_files = sorted(os.listdir(dataset_dir))[610:615]
     detection_file_list_3D, num_seq_3D = load_list_from_folder(detections_files_3D, detections_root_3D)
     # print(detection_file_list_3D)
     detection_file_list_2D, num_seq_2D = load_list_from_folder(detections_files_2D, detections_root_2D)
@@ -227,11 +228,15 @@ if __name__ == '__main__':
             # print('detection_2D_only:', detection_2D_only.shape)
             # print('-' * 50)
             
+             # just using fusion data
+            detection_3Dto2D_only = []
+            detection_3D_only = {'dets_3d_only': [], 'dets_3d_only_info': []}
+
             start_time = time.time()
-            # trackers = tracker.update(detection_3D_fusion, detection_2D_only_tlwh, detection_3D_only, detection_3Dto2D_only,
-            #                           additional_info, calib_file_seq)
-            trackers = tracker.update(detection_3D_fusion, detection_2D_only, detection_3D_only, detection_3Dto2D_only,
-                                      new_additional_info, calib_file_seq)
+            trackers = tracker.update(detection_3D_fusion, detection_2D_only_tlwh, detection_3D_only, detection_3Dto2D_only,
+                                      additional_info, calib_file_seq)
+            # trackers = tracker.update(detection_3D_fusion, detection_2D_only, detection_3D_only, detection_3Dto2D_only,
+            #                           new_additional_info, calib_file_seq)
             cycle_time = time.time() - start_time
             total_time += cycle_time
 
@@ -269,7 +274,10 @@ if __name__ == '__main__':
     # for evaluation
     if args.eval:
         import subprocess
-        import panadas as pd
+        import pandas as pd
+        from tqdm import tqdm
+        import re
+        import shutil
 
         src = args.save_path
         dst = args.save_path + '/trackeval'
@@ -280,15 +288,14 @@ if __name__ == '__main__':
         scenes = sorted(os.listdir(f'{src}/data'))
         dp = pd.read_csv(args.gt_data, index_col=0, dtype={'frame':object})
 
+        # make gt, evaluate_tracking.seqmap.training
+        seqmap = [f'{scene.replace(".txt", "")} empty 0000 0010' for scene in scenes]
+        seqmap[0] = re.sub('0000', '0001', seqmap[0])
+        with open(f'{dst}/gt/evaluate_tracking.seqmap.training', 'w') as f:
+            f.write('\n'.join(seqmap))
+
         for scene in tqdm(scenes):
             scene = scene.replace('.txt', '')
-
-            # make gt, evaluate_tracking.seqmap.training
-            seqmap = [f'{scene} empty 0000 0010' for scene in scenes]
-            seqmap[0] = re.sub('0000', '0001', seqmap[0])
-            with open(f'{dst}/gt/evaluate_tracking.seqmap.training', 'w') as f:
-                f.write('\n'.join(seqmap))
-
             
             # make gt, label_02
             scene_df = dp.loc[dp['scene']==scene].copy()
@@ -316,6 +323,3 @@ if __name__ == '__main__':
         run_trackeval = f'python scripts/run_kitti.py --GT_FOLDER {GT_FOLDER} --TRACKERS_FOLDER {TRACKERS_FOLDER} --OUTPUT_FOLDER {OUTPUT_FOLDER}'
 
         subprocess.call(run_trackeval, shell=True)
-
-
-
